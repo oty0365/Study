@@ -8,38 +8,51 @@ public class Enemy : MonoBehaviour
     public float speed;
     private List<Vector2Int> _wayPoints;
     private Coroutine _currentMove;
-    public List<Vector2Int> WayPoints 
+    private Vector2 currentTargetPos;
+    public List<Vector2Int> WayPoints
     {
         get => _wayPoints;
-        set 
+        set
         {
-            if (_wayPoints != value) 
+            if (_wayPoints != value)
             {
                 _wayPoints = value;
-                if (_currentMove != null) 
+
+                if (_currentMove != null)
                 {
                     StopCoroutine(_currentMove);
+                    _currentMove = null;
                 }
-                else
+
+                if (_wayPoints != null && _wayPoints.Count > 0)
                 {
                     _currentMove = StartCoroutine(Move());
                 }
             }
         }
     }
-        
+
     void Start()
     {
+        currentTargetPos = pathFinder.target.transform.position;
         WayPoints=pathFinder.PathFinding();
     }
 
 
     void Update()
     {
+        if (currentTargetPos != (Vector2)pathFinder.target.transform.position)
+        {
+            WayPoints = pathFinder.PathFinding();
+            currentTargetPos = pathFinder.target.transform.position;
+        }
     }
 
     private IEnumerator Move()
     {
+        if (_wayPoints == null || _wayPoints.Count == 0)
+            yield break;
+
         foreach (var i in WayPoints)
         {
             while (Vector2.Distance(gameObject.transform.position, i) > 0.01f)
@@ -47,7 +60,7 @@ public class Enemy : MonoBehaviour
                 gameObject.transform.position = Vector2.MoveTowards(gameObject.transform.position, i, Time.deltaTime * speed);
                 yield return null;
             }
-            
         }
     }
+
 }

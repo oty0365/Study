@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 public class PriorityQueue<T>
 {
@@ -24,9 +26,37 @@ public class PriorityQueue<T>
         return root;
     }
 
+    public T RandomDequeue()
+    {
+        if (heap.Count == 0)
+            throw new InvalidOperationException("Queue is empty");
+
+        var minimum = heap.Min(item => item.priority);
+
+        var randomList = new List<(T item, int priority)>();
+        foreach (var i in heap)
+        {
+            if (i.priority == minimum)
+            {
+                randomList.Add(i);
+            }
+        }
+        foreach(var i in randomList)
+        {
+            UnityEngine.Debug.Log(i);
+        }
+        int randomIndex = UnityEngine.Random.Range(0, randomList.Count);
+        var selected = randomList[randomIndex];
+
+        heap.Remove(selected);
+
+        return selected.item;
+    }
+
+
     public void Clear()
     {
-        foreach(var item in heap) heap.Remove(item);
+        heap.Clear();
     }
 
     private void HeapifyUp(int i)

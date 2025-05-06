@@ -14,13 +14,14 @@ public class PassedPoint
 public class PathFinder : MonoBehaviour
 {
     public GameObject target;
+    public GameObject wayPoint;
     private Vector2Int _startPos;
     public Vector2Int StartPos
     {
-        get => _startPos; 
+        get => _startPos;
         set
         {
-            _startPos = value;    
+            _startPos = value;
         }
     }
     public PriorityQueue<Vector2Int> openQueue = new PriorityQueue<Vector2Int>();
@@ -56,29 +57,52 @@ public class PathFinder : MonoBehaviour
         while (openQueue.Count > 0)
         {
             curPos = openQueue.Dequeue();
+            if (!openDict.ContainsKey(curPos))
+            {
+                continue;
+            }
+
             var curNode = openDict[curPos];
             openDict.Remove(curPos);
             closedDict[curPos] = curNode;
+            var mapInfos = TileMapManager.Instance.mapInfos;
 
             if (curPos == targetPos)
+            {
                 break;
+            }
 
             for (int i = 0; i < 8; i++)
             {
                 var newPos = new Vector2Int(curPos.x + _eightX[i], curPos.y + _eightY[i]);
-                var mapInfos = TileMapManager.Instance.mapInfos;
 
-                if (!mapInfos.ContainsKey(new Vector3Int(newPos.x, newPos.y, 0)) || !mapInfos[new Vector3Int(newPos.x, newPos.y, 0)].ableToGo)
+                if (!mapInfos.ContainsKey(new Vector3Int(newPos.x, newPos.y, 0)) ||
+                    !mapInfos[new Vector3Int(newPos.x, newPos.y, 0)].ableToGo)
                 {
                     continue;
                 }
+
                 if (closedDict.ContainsKey(newPos))
                 {
                     continue;
                 }
 
-                int g = curNode.gCost + 1;
+                bool isDiagonal = _eightX[i] != 0 && _eightY[i] != 0;
+                if (isDiagonal)
+                {
+                    Vector3Int adjPos1 = new Vector3Int(curPos.x + _eightX[i], curPos.y, 0);
+                    Vector3Int adjPos2 = new Vector3Int(curPos.x, curPos.y + _eightY[i], 0);
+
+                    if (!mapInfos.ContainsKey(adjPos1) || !mapInfos[adjPos1].ableToGo ||!mapInfos.ContainsKey(adjPos2) || !mapInfos[adjPos2].ableToGo)
+                    {
+                        continue;
+                    }
+                }
+
+                float moveCost = isDiagonal ? 1.4f : 1.0f;
+                int g = curNode.gCost + Mathf.RoundToInt(moveCost * 10);
                 int h = (int)Vector2Int.Distance(newPos, targetPos);
+                h += Random.Range(0, 400);
                 int f = g + h;
 
                 if (openDict.TryGetValue(newPos, out var existingNode))
@@ -122,7 +146,7 @@ public class PathFinder : MonoBehaviour
             /*Debug.Log("경로 출력:");
             foreach (var p in path)
             {
-                Debug.Log(p);
+                Instantiate(wayPoint, p, Quaternion.identity);
             }*/
 
             closedList.Clear();

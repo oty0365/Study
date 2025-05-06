@@ -13,6 +13,8 @@ public class TileMapManager : MonoBehaviour
     public static TileMapManager Instance { get; private set; }
     public Tilemap tileMap;
     public Dictionary<Vector3Int,TileInfo> mapInfos = new Dictionary<Vector3Int, TileInfo>();
+    public GameObject floor;
+    public GameObject wall;
 
     private void Awake()
     {
@@ -35,21 +37,15 @@ public class TileMapManager : MonoBehaviour
                 TileBase tile = tileMap.GetTile(pos);
                 if (tile == null)
                 {
+                    //Instantiate(floor, pos, Quaternion.identity);
                     mapInfos[pos].ableToGo = true;
                 }
                 else
                 {
+                    //Instantiate(wall, pos, Quaternion.identity);
                     mapInfos[pos].ableToGo = false;
                     mapInfos[pos].tileType = tile;
                 }
-            }
-        }
-        
-        for (int x = bounds.xMin; x < bounds.xMax; x++)
-        {
-            for (int y = bounds.yMin; y < bounds.yMax; y++)
-            {
-                Debug.Log(mapInfos[new Vector3Int(x, y)]?.tileType?.name + "," + mapInfos[new Vector3Int(x, y)].ableToGo);
             }
         }
     }
