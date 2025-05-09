@@ -41,7 +41,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (currentTargetPos != (Vector2)pathFinder.target.transform.position)
+        if (Vector2.Distance(currentTargetPos, (Vector2)pathFinder.target.transform.position) > 1) 
         {
             WayPoints = pathFinder.PathFinding();
             currentTargetPos = pathFinder.target.transform.position;
